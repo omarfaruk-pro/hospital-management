@@ -4,11 +4,11 @@ import React from 'react'
 export default function Header() {
     return (
         <>
-            <header>
-                <div className="container">
+            <header className="bg-bg shadow-sm py-4">
+                <div className="container flex items-center justify-between">
                     <div></div>
                     <nav>
-                        <ul className="flex items-center gap-6 text-sm text-text">
+                        <ul className="flex items-center gap-6 text-text text-lg font-medium">
                         <li>
                             <Link href="#" className="hover:text-primary transition-colors">
                                 Home

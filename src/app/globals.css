@@ -21,6 +21,12 @@ body {
   @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
 }
 
+a, button{
+  @apply cursor-pointer;
+}
+button:disabled {
+  @apply opacity-50 cursor-default;
+}
 
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-out;

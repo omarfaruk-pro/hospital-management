@@ -1,9 +1,11 @@
+import Header from "./component/Header";
 
 
 export default function BasicLayout({ children }) {
-  return (
-    <>
-      {children}
-    </>
-  )
+    return (
+        <>
+            <Header />
+            {children}
+        </>
+    )
 }

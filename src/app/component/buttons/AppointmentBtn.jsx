@@ -82,19 +82,19 @@ export default function AppointmentBtn({ doctor, className }) {
             email,
             date: selectedDate,
             doctorId: doctor._id,
-            type:"OPD",
-            status:"confirm",
+            type: "OPD",
+            status: "confirm",
             createdAt: new Date(),
         };
 
-
         const res = await createAppointment(data);
-        console.log(res, selectedDate)
-        Swal.fire({ 
-            icon: "success",
-            title: "Appointment Requested",
-            text: "We will confirm your appointment shortly.",
-        });
+        if (res.success) {
+            Swal.fire({
+                icon: "success",
+                title: "Appointment Success",
+                text: `Your appointment with Dr. ${doctor.name} on ${selectedDate.toDateString()} has been booked successfully! Your serial number is ${res.serialNo}. Please arrive 10 minutes early.`,
+            })
+        };
 
         setOpen(false);
         setSelectedDate(undefined);
