@@ -124,7 +124,7 @@ export async function findOrderById(orderId) {
         {
             $match: {
                 _id: new ObjectId(orderId),
-                type: "order", 
+                type: "order",
             },
         },
 
@@ -186,4 +186,74 @@ export async function findOrderById(orderId) {
     }
 
     return { success: true, order };
+}
+
+
+
+export async function getAllTestOrders() {
+    try {
+        const db = await connectDB();
+
+        const orders = await db.collection("orders")
+            .aggregate([
+                {
+                    $match: {
+                        type: "order",
+                    },
+                },
+
+                // 🔗 patient join
+                {
+                    $lookup: {
+                        from: "patient-info",
+                        localField: "patientId",
+                        foreignField: "patientId",
+                        as: "patient",
+                    },
+                },
+
+                {
+                    $unwind: {
+                        path: "$patient",
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
+
+                // 🔥 clean response
+                {
+                    $project: {
+                        _id: { $toString: "$_id" },
+                        orderId: 1,
+                        patientId: 1,
+
+                        total: 1,
+                        dueAmount: 1,
+                        paymentStatus: 1,
+                        orderStatus: 1,
+
+                        createdAt: 1,
+
+                        patientName: "$patient.name",
+                        patientPhone: "$patient.phone",
+                    },
+                },
+
+                // 📅 latest first
+                {
+                    $sort: { createdAt: -1 },
+                },
+            ])
+            .toArray();
+
+        return {
+            success: true,
+            data: orders,
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            data: [],
+        };
+    }
 }

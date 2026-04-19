@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import Link from 'next/link';
 import { MdPrint, MdLocalHospital, MdPerson, MdReceipt, MdPayment } from 'react-icons/md';
 
 export default function Invoice({ data }) {
@@ -185,7 +185,10 @@ export default function Invoice({ data }) {
                 </div>
 
                 {/* Print Button Wrapper */}
-                <div className="mt-8 flex justify-center print:hidden">
+                <div className="mt-8 flex justify-center print:hidden gap-5">
+                    <Link href={`/test`} className="flex items-center gap-2 bg-gray-200 text-gray-700 px-6 py-3 rounded-2xl font-bold hover:bg-gray-300 transition-all shadow-lg ">
+                        <MdPayment size={20} /> All Tests
+                    </Link>
                     <button
                         onClick={() => window.print()}
                         className="flex items-center gap-2 bg-secondary text-white px-8 py-3 rounded-2xl font-bold hover:bg-primary transition-all shadow-lg"
