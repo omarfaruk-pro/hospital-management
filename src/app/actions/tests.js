@@ -1,5 +1,6 @@
 "use server";
 
+import { ObjectId } from "mongodb";
 import { connectDB } from "../lib/mongoConnect";
 
 export async function getAllTests() {
@@ -28,7 +29,7 @@ export async function createOrder(data) {
 
     const {
         patientId,
-        testIds,
+        testsIds,
         testDetails,
         subtotal,
         discountPercent = 0,
@@ -42,9 +43,13 @@ export async function createOrder(data) {
         createdBy = null,
     } = data;
 
+
     // 🧠 basic validation
-    if (!patientId || !tests || tests.length === 0 || !total) {
-        throw new Error("Missing required fields");
+    if (!patientId || !testsIds || testsIds.length === 0 || !total) {
+        return {
+            success: false,
+            message: "Missing required fields",
+        };
     }
 
     const collection = db.collection("orders");
@@ -83,7 +88,7 @@ export async function createOrder(data) {
         orderId,
         patientId,
 
-        testIds,
+        testsIds,
         testDetails,
 
         subtotal,
@@ -109,4 +114,76 @@ export async function createOrder(data) {
         orderId,
         insertedId: result.insertedId.toString(),
     };
+}
+
+
+export async function findOrderById(orderId) {
+    const db = await connectDB();
+
+    const result = await db.collection("orders").aggregate([
+        {
+            $match: {
+                _id: new ObjectId(orderId),
+                type: "order", 
+            },
+        },
+
+        // 🔗 join with patient-info
+        {
+            $lookup: {
+                from: "patient-info",
+                localField: "patientId",
+                foreignField: "patientId",
+                as: "patient",
+            },
+        },
+
+        // 📦 array → object
+        {
+            $unwind: {
+                path: "$patient",
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+
+        // 🎯 optional clean response
+        {
+            $project: {
+                _id: { $toString: "$_id" },
+                orderId: 1,
+                patientId: 1,
+
+                testsIds: 1,
+                testDetails: 1,
+
+                subtotal: 1,
+                discountPercent: 1,
+                discountAmount: 1,
+                total: 1,
+
+                paymentStatus: 1,
+                paidAmount: 1,
+                dueAmount: 1,
+
+                orderStatus: 1,
+
+                createdAt: 1,
+
+                patient: {
+                    name: "$patient.name",
+                    phone: "$patient.phone",
+                    gender: "$patient.gender",
+                    dob: "$patient.dob",
+                },
+            },
+        },
+    ]).toArray();
+
+    const order = result[0];
+
+    if (!order) {
+        return { success: false, message: "Order not found" };
+    }
+
+    return { success: true, order };
 }

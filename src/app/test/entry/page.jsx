@@ -1,10 +1,12 @@
 "use client";
 import { createPatient, findPatientById } from "@/app/actions/patients";
-import { getAllTests } from "@/app/actions/tests";
+import { createOrder, getAllTests } from "@/app/actions/tests";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
 export default function LabOrderPage() {
+    const router = useRouter();
     const [patient, setPatient] = useState({
         id: "",
         name: "",
@@ -165,6 +167,23 @@ export default function LabOrderPage() {
             createdAt: new Date(),
             updatedAt: new Date(),
         };
+
+        const res = await createOrder(payload);
+        if (res.success) {
+            Swal.fire({
+                icon: "success",
+                title: "Order Created",
+                text: `Order ID: ${res?.orderId}`,
+            });
+            router.push(`/test/${res.insertedId}/view`);
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: res.message,
+            });
+        }
+
     }
 
 
