@@ -2,12 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { deleteTestOrder, getAllTestOrders } from "../actions/tests";
-import Link from "next/link";
+
 import Swal from "sweetalert2";
 import {
-    MdSearch, MdFilterList, MdAdd, MdVisibility,
-    MdEdit, MdDelete, MdPayment, MdHistory
+    MdSearch, MdAdd, MdVisibility, MdDelete,
+    MdTipsAndUpdates,
+    MdHistory,
+    MdEdit
 } from "react-icons/md";
+import TableSkeleton from "./TableSkeleton";
+import Link from "next/link";
 
 export default function AllTestPage() {
     const [orders, setOrders] = useState([]);
@@ -39,9 +43,9 @@ export default function AllTestPage() {
                 o.patientName.toLowerCase().includes(q)
             );
         }
-        if(filter === "unpaid") {
+        if (filter === "unpaid") {
             data = data.filter((o) => o.paymentStatus === "unpaid" || o.paymentStatus === "partial");
-        }else if (filter !== "all") {
+        } else if (filter !== "all") {
             data = data.filter((o) => o.paymentStatus === filter);
         }
         return data;
@@ -185,9 +189,13 @@ export default function AllTestPage() {
                                                 <Link href={`/test/${o._id}/view`} className="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-primary hover:text-white transition-all shadow-sm" title="View">
                                                     <MdVisibility size={18} />
                                                 </Link>
-                                                <Link href={`/test/${o._id}/edit`} className="p-2 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-500 hover:text-white transition-all shadow-sm" title="Edit">
-                                                    <MdEdit size={18} />
-                                                </Link>
+                                                {
+                                                    (o.paymentStatus === "unpaid" || o.paymentStatus === "partial") && (
+                                                        <Link href={`/test/${o._id}/update`} className="p-2 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-500 hover:text-white transition-all shadow-sm" title="Update">
+                                                            <MdEdit size={18} />
+                                                        </Link>
+                                                    )
+                                                }
                                                 <button onClick={() => handleTestOrderDelete(o._id)} className="p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm" title="Delete">
                                                     <MdDelete size={18} />
                                                 </button>
@@ -228,34 +236,3 @@ export default function AllTestPage() {
     );
 }
 
-// 💀 Skeleton Loader Component
-function TableSkeleton() {
-    return (
-        <div className="p-6 container mx-auto animate-pulse">
-            <div className="flex justify-between mb-8">
-                <div className="h-10 bg-gray-200 rounded-2xl w-48"></div>
-                <div className="h-12 bg-gray-200 rounded-2xl w-40"></div>
-            </div>
-            <div className="h-16 bg-gray-200 rounded-3xl mb-6 w-full"></div>
-            <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden">
-                {[...Array(6)].map((_, i) => (
-                    <div key={i} className="p-6 border-b border-gray-50 flex justify-between">
-                        <div className="space-y-2">
-                            <div className="h-4 bg-gray-200 rounded w-24"></div>
-                            <div className="h-3 bg-gray-100 rounded w-16"></div>
-                        </div>
-                        <div className="space-y-2">
-                            <div className="h-4 bg-gray-200 rounded w-32"></div>
-                            <div className="h-3 bg-gray-100 rounded w-20"></div>
-                        </div>
-                        <div className="h-8 bg-gray-100 rounded-full w-20"></div>
-                        <div className="flex gap-2">
-                            <div className="h-10 w-10 bg-gray-100 rounded-xl"></div>
-                            <div className="h-10 w-10 bg-gray-100 rounded-xl"></div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}

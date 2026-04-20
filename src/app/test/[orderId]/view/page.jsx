@@ -4,6 +4,7 @@ import { findOrderById } from "@/app/actions/tests";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Invoice from "./Invoice";
+import InvoiceSkeleton from "./InvoiceSkeleton";
 
 export default function LabOrderView() {
     const params = useParams();
@@ -25,9 +26,9 @@ export default function LabOrderView() {
     return (
         <>
             {loading ? (
-                <p>Loading...</p>
+                <InvoiceSkeleton />
             ) : (
-                <Invoice data={order} />
+                <Invoice data={order} orderId={orderId}/>
             )}
         </>
     );

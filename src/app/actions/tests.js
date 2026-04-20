@@ -270,3 +270,49 @@ export async function deleteTestOrder(orderId) {
 
     return { success: true, message: "Order deleted successfully" };
 }
+
+
+export async function updateTestOrderStatus(orderId, status) {
+    const db = await connectDB();
+
+    const result = await db.collection("orders").updateOne({
+        _id: new ObjectId(orderId),
+        type: "order",
+    }, {
+        $set: {
+            orderStatus: status,
+        },
+    });
+
+    return { success: true, message: "Order status updated successfully" };
+
+}
+
+export async function updateTestPaymentStatus(orderId, paidAmount) {
+    const db = await connectDB();
+
+    if (!paidAmount) {
+        return { success: false, message: "Paid amount is required" };
+    }
+    if (!orderId) {
+        return { success: false, message: "Order ID is required" };
+    }
+
+
+    await db.collection("orders").updateOne({
+        _id: new ObjectId(orderId),
+        type: "order",
+    }, {
+        $set: {
+            paymentStatus: "paid",
+            paidAmount,
+            dueAmount: 0,
+            updatedAt: new Date(),
+        },
+    }, {
+        upsert: true
+    }
+    );
+
+    return { success: true, message: "Payment status updated successfully" };
+}
