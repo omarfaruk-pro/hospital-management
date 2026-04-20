@@ -235,6 +235,7 @@ export async function getAllTestOrders() {
 
                         patientName: "$patient.name",
                         patientPhone: "$patient.phone",
+                        dob: "$patient.dob",
                     },
                 },
 
@@ -256,4 +257,16 @@ export async function getAllTestOrders() {
             data: [],
         };
     }
+}
+
+
+export async function deleteTestOrder(orderId) {
+    const db = await connectDB();
+
+    const result = await db.collection("orders").deleteOne({
+        _id: new ObjectId(orderId),
+        type: "order",
+    });
+
+    return { success: true, message: "Order deleted successfully" };
 }
