@@ -190,16 +190,17 @@ export async function findOrderById(orderId) {
 
 
 
-export async function getAllTestOrders() {
+export async function getAllTestOrders(lab = false) {
     try {
         const db = await connectDB();
+        const matchStage = lab
+            ? { type: "order", orderStatus: "pending" }
+            : { type: "order" };
 
         const orders = await db.collection("orders")
             .aggregate([
                 {
-                    $match: {
-                        type: "order",
-                    },
+                    $match: matchStage
                 },
 
                 // 🔗 patient join

@@ -3,17 +3,16 @@
 import { ObjectId } from "mongodb";
 import { connectDB } from "../lib/mongoConnect";
 
-export async function findPatientById(patientId) {
-    console.log(patientId)
+export async function findPatientById(pid) {
+    const patientId = pid.toUpperCase();
     try {
         if (!patientId) {
             return { success: false, message: "Patient ID required" };
         }
 
-        const db = await connectDB() 
-        const collection =await db.collection("patient-info");
+        const db = await connectDB()
+        const collection = await db.collection("patient-info");
 
-        // if you are using custom patientId field
         const patient = await collection.findOne({
             patientId: patientId,
         });

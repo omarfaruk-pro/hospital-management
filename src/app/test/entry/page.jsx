@@ -6,13 +6,15 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import {
     MdPersonAdd, MdSearch, MdOutlineReceiptLong,
-    MdAddCircleOutline, MdClose, MdPayments, MdPersonSearch
+    MdAddCircleOutline, MdClose, MdPayments, MdPersonSearch,
+    MdArrowBack
 } from "react-icons/md";
+import Link from "next/link";
 
 export default function LabOrderPage() {
     const router = useRouter();
     const [patient, setPatient] = useState({ id: "", name: "", phone: "", gender: "", dob: "" });
-    const [patientId, setPatientId] = useState("P-");
+    const [patientId, setPatientId] = useState("");
     const [isNew, setIsNew] = useState(true);
     const [paymentStatus, setPaymentStatus] = useState("");
     const [paidAmount, setPaidAmount] = useState(0);
@@ -114,8 +116,14 @@ export default function LabOrderPage() {
     };
 
     return (
-        <div className="bg-bg min-h-screen py-8 px-4 md:px-8">
-            <div className="max-w-7xl mx-auto grid grid-cols-12 gap-8">
+        <div className="bg-bg min-h-screen container py-8 px-4 md:px-8">
+                <div className="flex items-center gap-4 mb-8">
+                    <Link href="/test" className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors">
+                        <MdArrowBack size={24} className="text-gray-600" />
+                    </Link>
+                    <h1 className="text-2xl font-black text-text">Create New Test Order</h1>
+                </div>
+            <div className=" grid grid-cols-12 gap-8">
 
                 {/* --- Left Column: Patient & Billing --- */}
                 <div className="col-span-12 lg:col-span-4 space-y-6">
