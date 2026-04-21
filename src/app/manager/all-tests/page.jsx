@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAllTests } from "@/app/actions/tests";
-import { MdSearch, MdAdd, MdEdit, MdAccessTime, MdCategory, MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
+import { addNewTest, deleteTest, getAllTests, updateTest } from "@/app/actions/tests";
+import { MdSearch, MdAdd, MdEdit, MdAccessTime, MdCategory, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdDelete } from "react-icons/md";
 import TableSkeleton from "./TableSkeleton";
+import { getPages } from "@/app/lib/pagination";
+import Swal from "sweetalert2";
 
 export default function AllTestsPage() {
     const [tests, setTests] = useState([]);
@@ -11,8 +13,7 @@ export default function AllTestsPage() {
     const [displayData, setDisplayData] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // RESTORED: Your original pagination state
-    const [page, setPage] = useState(1); // Set to 1 for initial load logic
+    const [page, setPage] = useState(1);
     const limit = 10;
 
     const [search, setSearch] = useState("");
@@ -41,7 +42,6 @@ export default function AllTestsPage() {
         fetchTests();
     }, []);
 
-    // RESTORED: Your exact search logic (resetting page to 1 on search)
     useEffect(() => {
         const searchFn = () => {
             const result = tests.filter((t) =>
@@ -54,7 +54,7 @@ export default function AllTestsPage() {
         searchFn();
     }, [search, tests]);
 
-    // RESTORED: Your exact slice logic
+
     const handlePageChange = (p) => {
         setPage(p);
         const start = (p - 1) * limit;
@@ -64,24 +64,7 @@ export default function AllTestsPage() {
 
     const totalPages = Math.ceil(filtered.length / limit);
 
-    // RESTORED: Your exact getPages logic (including the specific index checks)
-    const getPages = () => {
-        const pages = [];
-        if (totalPages <= 5) {
-            for (let i = 1; i <= totalPages; i++) pages.push(i);
-            return pages;
-        }
-        for (let i = 1; i <= 3; i++) pages.push(i);
-        if (page > 5) pages.push("...");
-        for (let i = page - 1; i <= page + 1; i++) {
-            if (i > 3 && i < totalPages - 2) pages.push(i);
-        }
-        if (page < totalPages - 4) pages.push("...");
-        for (let i = totalPages - 2; i <= totalPages; i++) pages.push(i);
-        return pages;
-    };
 
-    // ... Modal Handlers (Stayed the same)
     const handleAdd = () => {
         setIsEdit(false);
         setForm({ name: "", category: "", price: "", reportTime: "" });
@@ -91,30 +74,60 @@ export default function AllTestsPage() {
     const handleEdit = (test) => {
         setIsEdit(true);
         setSelectedTest(test);
-        setForm({ name: test.name, price: test.price });
+        setForm({ name: test.name, price: test.price, category: test.category, reportTime: test.reportTime });
         setOpenModal(true);
     };
+
+    const handleDelete = async (id) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You will lost this test permanently",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!",
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const res = await deleteTest(id);
+                Swal.fire("Deleted!", res.message, "success");
+                setTests(tests.filter((t) => t._id !== id));
+            }
+        })
+    }
+
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+
         if (isEdit) {
-            const updated = tests.map((t) =>
-                t._id === selectedTest._id
-                    ? { ...t, name: form.name, price: Number(form.price) }
-                    : t
-            );
-            setTests(updated);
+            const res = await updateTest(selectedTest._id, { name: form.name, price: Number(form.price) });
+            if (res.success) {
+                Swal.fire({ icon: "success", title: "Test Updated", text: `${selectedTest.name} has been updated` });
+                const updatedTests = tests.map((t) => {
+                    if (t._id === selectedTest._id) {
+                        return { ...t, name: form.name, price: Number(form.price) };
+                    }
+                    return t;
+                });
+                setTests(updatedTests);
+            }
         } else {
             const newTest = {
-                _id: Date.now().toString(),
                 name: form.name,
                 category: form.category,
                 price: Number(form.price),
                 reportTime: form.reportTime,
             };
+            const res = await addNewTest(newTest);
+            if (!res.success) {
+                Swal.fire({ icon: "error", title: "Error", text: res.message });
+                return;
+            }
+            Swal.fire({ icon: "success", title: "Test Added", text: `${newTest.name} has been added` });
             setTests([newTest, ...tests]);
         }
         setOpenModal(false);
@@ -177,6 +190,9 @@ export default function AllTestsPage() {
                                                 <button onClick={() => handleEdit(t)} className="p-2 bg-primary/10 text-primary rounded-xl hover:bg-primary hover:text-white transition-all">
                                                     <MdEdit size={18} />
                                                 </button>
+                                                <button onClick={() => handleDelete(t._id)} className="p-2 bg-red-100 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all ml-2">
+                                                    <MdDelete size={18} />
+                                                </button>
                                             </td>
                                         </tr>
                                     ))
@@ -197,7 +213,7 @@ export default function AllTestsPage() {
                                 Prev
                             </button>
 
-                            {getPages().map((p, i) =>
+                            {getPages(totalPages, page).map((p, i) =>
                                 p === "..." ? (
                                     <span key={`dots-${i}`} className="px-3 py-2 text-gray-400 font-bold">...</span>
                                 ) : (
@@ -247,30 +263,32 @@ export default function AllTestsPage() {
                                 />
                             </div>
 
-                            {!isEdit && (
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Category</label>
-                                        <input
-                                            name="category"
-                                            value={form.category}
-                                            onChange={handleChange}
-                                            placeholder="Hematology"
-                                            className="w-full p-4 bg-bg rounded-2xl outline-none"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Report Time</label>
-                                        <input
-                                            name="reportTime"
-                                            value={form.reportTime}
-                                            onChange={handleChange}
-                                            placeholder="12 Hours"
-                                            className="w-full p-4 bg-bg rounded-2xl outline-none"
-                                        />
-                                    </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Category</label>
+                                    <input
+                                        name="category"
+                                        value={form.category}
+                                        onChange={handleChange}
+                                        placeholder="Hematology"
+                                        className="w-full p-4 bg-bg rounded-2xl outline-none"
+                                        readOnly={isEdit}
+                                    />
                                 </div>
-                            )}
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Report Time</label>
+                                    <input
+                                        name="reportTime"
+                                        value={form.reportTime}
+                                        onChange={handleChange}
+                                        placeholder="12 Hours"
+                                        className="w-full p-4 bg-bg rounded-2xl outline-none"
+                                        readOnly={isEdit}
+                                    />
+                                </div>
+                            </div>
+
 
                             <div className="space-y-1">
                                 <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Test Price (৳)</label>
@@ -287,7 +305,17 @@ export default function AllTestsPage() {
 
                         <div className="p-8 pt-0 flex gap-3">
                             <button
-                                onClick={() => setOpenModal(false)}
+                                onClick={() => (
+                                    setOpenModal(false),
+                                    setIsEdit(false),
+                                    setForm({
+                                        name: "",
+                                        category: "",
+                                        reportTime: "",
+                                        price: "",
+                                    }),
+                                    setSelectedTest(null)
+                                )}
                                 className="flex-1 py-4 font-black uppercase tracking-widest text-[10px] text-gray-400 hover:text-text transition-colors"
                             >
                                 Cancel

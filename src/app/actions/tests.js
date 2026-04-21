@@ -23,6 +23,29 @@ export async function getAllTests() {
 }
 
 
+export async function updateTest(id, data) {
+    const db = await connectDB();
+    const result = await db.collection("tests").updateOne({ _id: new ObjectId(id) }, { $set: data });
+    return { success: true, message: "Test updated successfully" };
+}
+
+
+export async function deleteTest(id) {
+    const db = await connectDB();
+    const result = await db.collection("tests").deleteOne({ _id: new ObjectId(id) });
+    return { success: true, message: "Test deleted successfully" };
+}
+
+
+export async function addNewTest(data) {
+    const db = await connectDB();
+    const { name, price, category, reportTime } = data;
+    if (!name || !price || !category || !reportTime) {
+        return { success: false, message: "Missing required fields" };
+    }
+    const result = await db.collection("tests").insertOne(data);
+    return { success: true, message: "Test added successfully" };
+}
 
 export async function createOrder(data) {
     const db = await connectDB();
