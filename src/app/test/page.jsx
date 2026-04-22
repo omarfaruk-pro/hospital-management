@@ -13,7 +13,7 @@ import {
 import TableSkeleton from "./TableSkeleton";
 import Link from "next/link";
 
-export default function AllTestPage() {
+export default function AllOrder() {
     const [orders, setOrders] = useState([]);
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState("all");

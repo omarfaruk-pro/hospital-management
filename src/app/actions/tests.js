@@ -214,11 +214,9 @@ export async function findOrderById(orderId) {
 
 
 export async function getAllTestOrders(lab = false) {
+    const matchStage = !lab ? { type: "order" } : { type: "order", orderStatus: { $in: ["pending", "processing"] } };
     try {
         const db = await connectDB();
-        const matchStage = lab
-            ? { type: "order", orderStatus: "pending" }
-            : { type: "order" };
 
         const orders = await db.collection("orders")
             .aggregate([
@@ -339,4 +337,67 @@ export async function updateTestPaymentStatus(orderId, paidAmount) {
     );
 
     return { success: true, message: "Payment status updated successfully" };
+}
+
+
+
+export async function getMyTestsByMyId(patientId) {
+    const db = await connectDB();
+    if (!patientId) {
+        return { success: false, message: "Patient ID is required" };
+    }
+    const result = await db.collection("orders").aggregate([
+        {
+            $match: {
+                patientId,
+            },
+        },
+        {
+            $lookup: {
+                from: "patient-info",
+                localField: "patientId",
+                foreignField: "patientId",
+                as: "patient",
+            },
+        },
+
+        // 📦 array → object
+        {
+            $unwind: {
+                path: "$patient",
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+
+        {
+            $project: {
+                _id: { $toString: "$_id" },
+                orderId: 1,
+                patientId: 1,
+
+                testsIds: 1,
+                testDetails: 1,
+
+                subtotal: 1,
+                discountPercent: 1,
+                discountAmount: 1,
+                total: 1,
+
+                paymentStatus: 1,
+                paidAmount: 1,
+                dueAmount: 1,
+
+                orderStatus: 1,
+
+                createdAt: 1,
+
+                patientName: "$patient.name",
+                patientPhone: "$patient.phone",
+            },
+        },
+    ]).toArray();
+    if (!result) {
+        return { success: false, message: "No tests found" };
+    }
+    return { success: true, data: result };
 }

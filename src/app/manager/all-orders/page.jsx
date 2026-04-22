@@ -1,28 +1,30 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { deleteTestOrder, getAllTestOrders } from "@/app/actions/tests";
 
 import Swal from "sweetalert2";
 import {
-    MdSearch,
-    MdHistory
+    MdSearch, MdAdd, MdVisibility, MdDelete,
+    MdTipsAndUpdates,
+    MdHistory,
+    MdEdit
 } from "react-icons/md";
 import TableSkeleton from "./TableSkeleton";
 import Link from "next/link";
-import { getAllTestOrders, updateTestOrderStatus } from "@/app/actions/tests";
 
-export default function AllLabTestPage() {
+export default function AllOrderPage() {
     const [orders, setOrders] = useState([]);
     const [search, setSearch] = useState("");
+    const [filter, setFilter] = useState("all");
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
-    const [fiteredData, setFilteredData] = useState([]);
     const limit = 10;
 
     useEffect(() => {
         const getAllTests = async () => {
             setLoading(true);
-            const res = await getAllTestOrders("lab");
+            const res = await getAllTestOrders();
             if (res.success) {
                 setOrders(res.data);
             }
@@ -31,47 +33,56 @@ export default function AllLabTestPage() {
         getAllTests();
     }, []);
 
-
-    useEffect(() => {
-        const seachFn = () => {
-            setFilteredData(orders);
+    const filteredOrders = useMemo(() => {
+        let data = orders;
+        if (search) {
             const q = search.toLowerCase();
-            const data = orders.filter((o) =>
+            data = data.filter((o) =>
                 o.patientId.toLowerCase().includes(q) ||
                 o.patientPhone.toLowerCase().includes(q) ||
                 o.patientName.toLowerCase().includes(q)
             );
-            setFilteredData(data);
         }
-        seachFn();
-    }, [search, orders]);
+        if (filter === "unpaid") {
+            data = data.filter((o) => o.paymentStatus === "unpaid" || o.paymentStatus === "partial");
+        } else if (filter !== "all") {
+            data = data.filter((o) => o.paymentStatus === filter);
+        }
+        return data;
+    }, [orders, search, filter]);
 
+    const paginated = useMemo(() => {
+        const start = (page - 1) * limit;
+        return filteredOrders.slice(start, start + limit);
+    }, [filteredOrders, page]);
 
-    const paginated = fiteredData.slice((page - 1) * limit, page * limit) || []
+    const totalPages = Math.ceil(filteredOrders.length / limit);
 
-
-    const totalPages = Math.ceil(orders.length / limit);
-
-
+    const handleTestOrderDelete = (id) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This action cannot be undone!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!",
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const res = await deleteTestOrder(id);
+                if (res.success) {
+                    Swal.fire("Deleted!", res.message, "success");
+                    setOrders(orders.filter((o) => o._id !== id));
+                }
+            }
+        });
+    };
     const getAge = (dob) => {
         const birthDate = new Date(dob);
         const today = new Date();
         let age = today.getFullYear() - birthDate.getFullYear();
         return age;
     };
-
-    const handleStatusUpdate = async (orderId) => {
-        const res = await updateTestOrderStatus(orderId, "processing");
-        if (res.success) {
-            Swal.fire({
-                icon: "success",
-                title: "Success!",
-                text: res.message,
-                timer: 1500,
-            });
-            setOrders(orders.map((o) => o._id === orderId ? { ...o, orderStatus: "processing" } : o));
-        }
-    }
 
     if (loading) return <TableSkeleton />;
 
@@ -87,6 +98,12 @@ export default function AllLabTestPage() {
                         </h1>
                         <p className="text-gray-500 text-sm">Monitor and manage all diagnostic test requests.</p>
                     </div>
+                    <Link
+                        href="/test/entry"
+                        className="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-100 transform active:scale-95"
+                    >
+                        <MdAdd size={20} /> New Test Entry
+                    </Link>
                 </div>
 
                 {/* Search and Filter Bar */}
@@ -102,6 +119,20 @@ export default function AllLabTestPage() {
                         />
                     </div>
 
+                    <div className="flex items-center gap-2 bg-bg p-1.5 rounded-2xl w-full lg:w-auto">
+                        {['all', 'paid', 'unpaid'].map((status) => (
+                            <button
+                                key={status}
+                                onClick={() => setFilter(status)}
+                                className={`flex-1 lg:flex-none px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${filter === status
+                                    ? "bg-white text-primary shadow-sm"
+                                    : "text-gray-400 hover:text-text"
+                                    }`}
+                            >
+                                {status}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Table Container */}
@@ -155,20 +186,19 @@ export default function AllLabTestPage() {
                                         </td>
                                         <td className="p-5">
                                             <div className="flex justify-end gap-2">
-
+                                                <Link href={`/test/${o._id}/view`} className="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-primary hover:text-white transition-all shadow-sm" title="View">
+                                                    <MdVisibility size={18} />
+                                                </Link>
                                                 {
-                                                    o.orderStatus === "pending" ? (
-                                                        <button onClick={() => handleStatusUpdate(o._id)} className="p-2 bg-amber-50 text-sm font-semibold text-amber-800 rounded-md hover:bg-amber-500 hover:text-white transition-all shadow-sm">
-                                                            Update
-                                                        </button>
-                                                    ) : (
-                                                        <Link href={`/lab/report-upload/${o._id}`} className="p-2 bg-amber-50 text-sm font-semibold text-amber-800 rounded-md hover:bg-amber-500 hover:text-white transition-all shadow-sm">
-                                                            Upload Report
+                                                    (o.paymentStatus === "unpaid" || o.paymentStatus === "partial") && (
+                                                        <Link href={`/test/${o._id}/update`} className="p-2 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-500 hover:text-white transition-all shadow-sm" title="Update">
+                                                            <MdEdit size={18} />
                                                         </Link>
                                                     )
                                                 }
-
-
+                                                <button onClick={() => handleTestOrderDelete(o._id)} className="p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm" title="Delete">
+                                                    <MdDelete size={18} />
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>

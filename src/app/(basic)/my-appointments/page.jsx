@@ -13,15 +13,18 @@ export default function MyAppointmentsPage() {
     const [showModal, setShowModal] = useState(false);
     const router = useRouter();
 
-    // 🔹 load from localStorage
     useEffect(() => {
-        const stored = localStorage.getItem("patientPhone");
+        const initModalFn = () => {
+            const stored = localStorage.getItem("patientPhone");
 
-        if (!stored) {
-            setShowModal(true);
-        } else {
-            setPhone(stored);
+            if (!stored) {
+                setShowModal(true);
+            } else {
+                setPhone(stored);
+            }
         }
+
+        initModalFn();
     }, []);
 
     useEffect(() => {
@@ -90,7 +93,7 @@ export default function MyAppointmentsPage() {
                             No appointments found
                         </div>
                     ) : (
-                        appointments.map((item) => <MyAppointmentCard key={item._id} item={item}  setAppointments={setAppointments} />)
+                        appointments.map((item) => <MyAppointmentCard key={item._id} item={item} setAppointments={setAppointments} />)
                     )}
                 </div>
             </div>
