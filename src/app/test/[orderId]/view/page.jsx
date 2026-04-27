@@ -21,7 +21,6 @@ export default function LabOrderView() {
         getorder();
     }, [orderId]);
 
-    console.log(loading, order)
 
     return (
         <>

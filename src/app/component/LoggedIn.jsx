@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 
 export default function LoggedIn() {
     const { user, setUser } = useContext(AuthContext);
+    console.log(user)
 
     const handleLogout = async () => {
         const res = await fetch("/api/auth/logout", {

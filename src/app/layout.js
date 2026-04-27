@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
+import LoggedIn from "./component/LoggedIn";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -21,7 +22,10 @@ export default function RootLayout({ children }) {
       className={` ${inter.variable} antialiased`}
     >
       <body className="min-h-full">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <LoggedIn />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

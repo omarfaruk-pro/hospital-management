@@ -10,7 +10,7 @@ export default function Header() {
                     <nav>
                         <ul className="flex items-center gap-6 text-text text-lg font-medium">
                         <li>
-                            <Link href="#" className="hover:text-primary transition-colors">
+                            <Link href="/" className="hover:text-primary transition-colors">
                                 Home
                             </Link>
                         </li>
