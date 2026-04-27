@@ -24,6 +24,11 @@ export default function Header() {
                                 My Appointments
                             </Link>
                         </li>
+                        <li>
+                            <Link href="/login" className="hover:text-primary transition-colors">
+                                Login
+                            </Link>
+                        </li>
                     </ul>
                 </nav>
                 <div></div>
