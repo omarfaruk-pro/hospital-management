@@ -32,6 +32,9 @@ export default function ManagerSideBar() {
                     <li>
                         <NavLink href="/manager/all-tests">All Tests</NavLink>
                     </li>
+                    <li>
+                        <NavLink href="/manager/all-doctors">All Doctors</NavLink>
+                    </li>
                 </ul>
             </div>
         </>

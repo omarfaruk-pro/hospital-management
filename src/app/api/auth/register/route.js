@@ -13,12 +13,14 @@ export async function POST(req) {
 
   const hashed = await bcrypt.hash(password, 10);
 
+
   const result = await db.collection("users").insertOne({
     name,
     email,
     password: hashed,
-    role: "pending",
+    role: "user",
   });
+
 
   if (!result.insertedId) {
     return Response.json({ message: "Failed to create user" }, { status: 500 });

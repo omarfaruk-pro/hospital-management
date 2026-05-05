@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { addNewTest, deleteTest, getAllTests, updateTest } from "@/app/actions/tests";
-import { MdSearch, MdAdd, MdEdit, MdAccessTime, MdCategory, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdDelete } from "react-icons/md";
+import { MdSearch, MdAdd, MdEdit, MdDelete } from "react-icons/md";
 import TableSkeleton from "./TableSkeleton";
 import { getPages } from "@/app/lib/pagination";
 import Swal from "sweetalert2";

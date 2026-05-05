@@ -1,10 +1,10 @@
 
-import { 
-  MdSchool, 
-  MdWork, 
-  MdPayments, 
-  MdAccessTime, 
-  MdPhoneInTalk, 
+import {
+  MdSchool,
+  MdWork,
+  MdPayments,
+  MdAccessTime,
+  MdPhoneInTalk,
   MdVerifiedUser,
   MdLabel,
   MdInfo,
@@ -15,9 +15,9 @@ import { getDoctorById } from '@/app/actions/getDoctors';
 import Image from 'next/image';
 import AppointmentBtn from '@/app/component/buttons/AppointmentBtn';
 
-export default async function DoctorDetailsPage({params}) {
-  const {id} =await params;
- 
+export default async function DoctorDetailsPage({ params }) {
+  const { id } = await params;
+
   const doctor = await getDoctorById(id);
 
 
@@ -57,9 +57,9 @@ export default async function DoctorDetailsPage({params}) {
               <div className="aspect-square relative rounded-2xl overflow-hidden border-4 border-primary/10">
                 <Image
                   width="400"
-                  height="400" 
-                  src={doctor.photoUrl} 
-                  alt={doctor.name} 
+                  height="400"
+                  src={doctor?.photoUrl}
+                  alt={doctor?.name}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -79,18 +79,20 @@ export default async function DoctorDetailsPage({params}) {
                   <MdVerifiedUser className="text-primary" />
                   {doctor.designation}
                 </p>
-                <p className="text-gray-400 text-xs mt-2 uppercase tracking-widest">ID: {doctor._id}</p>
+                <p className="text-gray-600 text-xs mt-2 uppercase tracking-widest"><strong>BMDC Registration:</strong> {doctor?.registrationNumber}</p>
               </div>
 
-              {/* Bio Section */}
-              <div className="p-5 bg-bg/50 rounded-2xl border border-gray-100">
-                <h3 className="flex items-center gap-2 text-sm font-bold text-text mb-2 uppercase">
-                  <MdInfo className="text-primary" /> About Doctor
-                </h3>
-                <p className="text-gray-600 leading-relaxed italic">
-                  &quot;{doctor.bio}&quot;
-                </p>
-              </div>
+              {
+                doctor.about &&
+                <div className="p-5 bg-bg/50 rounded-2xl border border-gray-100">
+                  <h3 className="flex items-center gap-2 text-sm font-bold text-text mb-2 uppercase">
+                    <MdInfo className="text-primary" /> About Doctor
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed italic">
+                    &quot;{doctor?.about}&quot;
+                  </p>
+                </div>
+              }
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center gap-4 p-4 rounded-xl bg-bg">
@@ -107,7 +109,10 @@ export default async function DoctorDetailsPage({params}) {
                     <MdPhoneInTalk className="text-primary text-2xl" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Assistant Contact</p>
+                    {
+                      doctor.emergencyContact.name &&
+                      <p className="text-sm text-gray-500">{doctor.emergencyContact.name} (Assistant)</p>
+                    }
                     <p className="font-bold text-text">{doctor.emergencyContact.phone}</p>
                   </div>
                 </div>
@@ -118,50 +123,53 @@ export default async function DoctorDetailsPage({params}) {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-  
+
             <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
               <h2 className="text-2xl font-bold text-text mb-8 flex items-center gap-3">
                 <MdSchool className="text-primary" /> Professional Background
               </h2>
 
               <div className="space-y-10">
-               
-                <div>
-                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Education</h3>
-                  {doctor.education.map((edu, index) => (
-                    <div key={index} className="flex gap-4">
-                      <div className="h-12 w-12 rounded-xl bg-primary text-white flex items-center justify-center shrink-0">
-                        <MdSchool size={24} />
-                      </div>
-                      <div>
-                        <h4 className="text-lg font-bold text-text">{edu.degree}</h4>
-                        <p className="text-gray-600 font-medium">{edu.institute}, {edu.country}</p>
-                        <p className="text-secondary font-bold mt-1 text-sm">Graduated {edu.year}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
 
-           
-                <div>
-                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Work History</h3>
-                  {doctor.workExperiences.map((exp, index) => (
-                    <div key={index} className="flex gap-4">
-                      <div className="h-12 w-12 rounded-xl bg-secondary text-white flex items-center justify-center shrink-0">
-                        <MdWork size={24} />
-                      </div>
-                      <div>
-                        <h4 className="text-lg font-bold text-text">{exp.designation}</h4>
-                        <p className="text-gray-600 font-medium">{exp.hospital}</p>
-                        <div className="flex items-center gap-2 text-xs font-bold text-primary mt-1">
-                          <span>{exp.from}</span>
-                          <HiOutlineArrowNarrowRight />
-                          <span>{exp.to}</span>
+                {doctor.education &&
+                  <div>
+                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Education</h3>
+                    {doctor.education.map((edu, index) => (
+                      <div key={index} className="flex gap-4">
+                        <div className="h-12 w-12 rounded-xl bg-primary text-white flex items-center justify-center shrink-0">
+                          <MdSchool size={24} />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-bold text-text">{edu.degree}</h4>
+                          <p className="text-gray-600 font-medium">{edu.institute}, {edu.country}</p>
+                          <p className="text-secondary font-bold mt-1 text-sm">Graduated {edu.year}</p>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                }
+
+                {doctor.workExperiences &&
+                  <div>
+                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Work History</h3>
+                    {doctor.workExperiences.map((exp, index) => (
+                      <div key={index} className="flex gap-4">
+                        <div className="h-12 w-12 rounded-xl bg-secondary text-white flex items-center justify-center shrink-0">
+                          <MdWork size={24} />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-bold text-text">{exp.designation}</h4>
+                          <p className="text-gray-600 font-medium">{exp.hospital}</p>
+                          <div className="flex items-center gap-2 text-xs font-bold text-primary mt-1">
+                            <span>{exp.from}</span>
+                            <HiOutlineArrowNarrowRight />
+                            <span>{exp.to}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                }
               </div>
             </div>
 
@@ -175,7 +183,7 @@ export default async function DoctorDetailsPage({params}) {
                   <span className="text-3xl font-extrabold">{averageRating}</span>
                   <div className="flex flex-col">
                     <div className="flex text-amber-500">
-                        {[...Array(5)].map((_, i) => <MdStar key={i} size={16} className={i < Math.round(averageRating) ? 'text-amber-500' : 'text-gray-300'}/>)}
+                      {[...Array(5)].map((_, i) => <MdStar key={i} size={16} className={i < Math.round(averageRating) ? 'text-amber-500' : 'text-gray-300'} />)}
                     </div>
                     <span className="text-xs font-medium text-secondary">{reviews.length} total reviews</span>
                   </div>
@@ -239,14 +247,14 @@ export default async function DoctorDetailsPage({params}) {
                       </span>
                     </div>
                     <div className="text-blue-100 flex items-center gap-2 font-medium">
-                      <MdAccessTime size={18}/> {sch.startTime} - {sch.endTime}
+                      <MdAccessTime size={18} /> {sch.startTime} - {sch.endTime}
                     </div>
                   </div>
                 ))}
               </div>
-              
-              <AppointmentBtn doctor={doctor} className="w-full mt-8 bg-primary hover:bg-white hover:text-secondary text-white py-4 rounded-2xl font-bold transition-all transform active:scale-95 shadow-xl"/>
-              
+
+              <AppointmentBtn doctor={doctor} className="w-full mt-8 bg-primary hover:bg-white hover:text-secondary text-white py-4 rounded-2xl font-bold transition-all transform active:scale-95 shadow-xl" />
+
             </div>
 
           </div>

@@ -53,6 +53,11 @@ export async function getDoctors() {
                 _id: { $toString: "$_id" }
             }
         },
+        {
+            $sort: {
+                createdAt: 1
+            }
+        },
 
         {
             $limit: 8
@@ -114,6 +119,9 @@ export async function getDoctorById(id) {
         {
             $project: {
                 name: 1,
+                email: 1,
+                phone: 1,
+                gender: 1,
                 photoUrl: 1,
                 designation: 1,
                 experienceYears: 1,
@@ -122,7 +130,10 @@ export async function getDoctorById(id) {
                 workExperiences: 1,
                 schedule: 1,
                 emergencyContact: 1,
+                registrationNumber: 1,
                 departments: 1,
+                status:1,
+                about: 1,
                 createdAt: 1
             }
         },

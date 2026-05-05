@@ -8,11 +8,34 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_SECRET,
 });
 
-export async function uploadReport(formData) {
+export async function uploadReport(formData, type) {
+
     const file = formData.get("file");
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    if (type === "image") {
+        return new Promise((resolve, reject) => {
+            cloudinary.uploader
+                .upload_stream(
+                    {
+                        resource_type: "image",
+                        public_id: `doctors_${Date.now()}.jpg`,
+                        folder: "doctors",
+                    },
+                    (error, result) => {
+                        if (error) reject(error);
+
+                        resolve({
+                            success: true,
+                            url: result.secure_url,
+                        });
+                    }
+                )
+                .end(buffer);
+        });
+    }
 
     return new Promise((resolve, reject) => {
         cloudinary.uploader
