@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MdSearch, MdAdd, MdDelete, MdEdit } from "react-icons/md";
+import { MdSearch, MdAdd, MdDelete, MdEdit, MdRemoveRedEye } from "react-icons/md";
 import TableSkeleton from "./TableSkeleton";
 import { getPages } from "@/app/lib/pagination";
 import Image from "next/image";
@@ -173,6 +173,12 @@ export default function AllDoctorsPage() {
                                             {/* Action */}
                                             <td className="px-8 py-5 text-right">
                                                 <div className="flex gap-1 justify-end">
+                                                <Link
+                                                        href={`/doctors/${doc._id}`}
+                                                        className="p-2 bg-blue-50 text-blue-800 rounded-xl hover:bg-blue-600 hover:text-white transition-all"
+                                                    >
+                                                        <MdRemoveRedEye size={18} />
+                                                    </Link>
                                                     <Link
                                                         href={`/manager/${doc._id}/edit-doctor`}
                                                         className="p-2 bg-blue-100 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all"

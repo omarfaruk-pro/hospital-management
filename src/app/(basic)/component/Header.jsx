@@ -29,6 +29,11 @@ export default function Header() {
                                 Login
                             </Link>
                         </li>
+                        <li>
+                            <Link href="/manager" className="hover:text-primary transition-colors">
+                                Manager
+                            </Link>
+                        </li>
                     </ul>
                 </nav>
                 <div></div>
